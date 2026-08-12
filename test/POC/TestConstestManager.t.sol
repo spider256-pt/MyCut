@@ -6,9 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {ContestManager} from "../../src/ContestManager.sol";
 import {DeployMyCut} from "../../script/DeployScript.s.sol";
 
-import {
-    ERC20Mock
-} from "lib/openzeppelin-contracts/contracts/mocks/token/ERC20Mock.sol";
+import {ERC20Mock} from "lib/openzeppelin-contracts/contracts/mocks/token/ERC20Mock.sol";
 
 contract TestContestManager is Test {
     /*//////////////////////////////////////////////////////////////
@@ -21,8 +19,7 @@ contract TestContestManager is Test {
 
     address spider = makeAddr("spider");
 
-    address constant default_Foundry =
-        0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
+    address constant default_Foundry = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
 
     /*//////////////////////////////////////////////////////////////
                              FUNCTIONAL TEST
@@ -54,12 +51,7 @@ contract TestContestManager is Test {
         rewards[0] = 1e18;
         uint256 totalrewards = 2e18;
         //Act
-        address createdContest = cmanager.createContest(
-            players,
-            rewards,
-            mERC20,
-            totalrewards
-        );
+        address createdContest = cmanager.createContest(players, rewards, mERC20, totalrewards);
         vm.stopPrank();
         //Assert
         assertEq(cmanager.contestToTotalRewards(createdContest), totalrewards);
@@ -76,12 +68,7 @@ contract TestContestManager is Test {
         uint256 totalRewards = 2e18;
         //Act
         vm.expectRevert();
-        address createdContest = cmanager.createContest(
-            players,
-            rewards,
-            mERC20,
-            totalRewards
-        );
+        address createdContest = cmanager.createContest(players, rewards, mERC20, totalRewards);
         vm.stopPrank();
     }
 }

@@ -3,9 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Pot} from "./Pot.sol";
 import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
-import {
-    IERC20
-} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 contract ContestManager is Ownable {
     address[] public contests;
@@ -15,12 +13,11 @@ contract ContestManager is Ownable {
 
     constructor() Ownable(msg.sender) {}
 
-    function createContest(
-        address[] memory players,
-        uint256[] memory rewards,
-        IERC20 token,
-        uint256 totalRewards
-    ) public onlyOwner returns (address) {
+    function createContest(address[] memory players, uint256[] memory rewards, IERC20 token, uint256 totalRewards)
+        public
+        onlyOwner
+        returns (address)
+    {
         // Create a new Pot contract
         Pot pot = new Pot(players, rewards, token, totalRewards);
         contests.push(address(pot));
@@ -44,15 +41,11 @@ contract ContestManager is Ownable {
         return contests;
     }
 
-    function getContestTotalRewards(
-        address contest
-    ) public view returns (uint256) {
+    function getContestTotalRewards(address contest) public view returns (uint256) {
         return contestToTotalRewards[contest];
     }
 
-    function getContestRemainingRewards(
-        address contest
-    ) public view returns (uint256) {
+    function getContestRemainingRewards(address contest) public view returns (uint256) {
         Pot pot = Pot(contest);
         return pot.getRemainingRewards();
     }
