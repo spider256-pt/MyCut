@@ -34,6 +34,14 @@ contract TestContestManager is Test {
         cmanager = deployer.run();
 
         mERC20 = new ERC20Mock();
+
+        //For spider
+        mERC20.mint(spider, 1e18);
+        vm.startPrank(spider);
+        mERC20.approve(address(cmanager), 1e18);
+        vm.stopPrank();
+
+        //For default Foundry
         mERC20.mint(default_Foundry, 1e18);
         vm.startPrank(default_Foundry);
         mERC20.approve(address(cmanager), 1e18);
@@ -125,16 +133,103 @@ contract TestContestManager is Test {
             address(createdContest)
         );
         uint256 InitialbalanceOfTheUser = mERC20.balanceOf(default_Foundry);
+        //Act
+        cmanager.fundContest(index);
 
-        console.log("initialTotalReward", initialTotalReward);
-        console.log("InitialbalanceOfTheUser", InitialbalanceOfTheUser);
+        uint256 finalTotalReward = cmanager.getContestTotalRewards(
+            address(createdContest)
+        );
+        uint256 finalBalanceOfTheUSer = mERC20.balanceOf(default_Foundry);
+        //Assert
+        assertEq(
+            finalBalanceOfTheUSer,
+            InitialbalanceOfTheUser - initialTotalReward,
+            "Should be the difference of Balance of the user and the total reward"
+        );
+    }
+
+    function test_RevertIfNonOwnerCallsFundContest() public createContest {
+        //Arrange
+
+        uint256 InitialBalnceOfSpider = mERC20.balanceOf(spider);
+        uint256 InitialTotalReward = cmanager.contestToTotalRewards(
+            address(createdContest)
+        );
+        //Act
+        vm.startPrank(spider);
+        vm.expectRevert();
+        cmanager.fundContest(0);
+        vm.stopPrank();
+        uint256 finalBalanceOfSPiderAfterTransFer = mERC20.balanceOf(spider);
+        //Assert
+        assertEq(
+            InitialBalnceOfSpider,
+            finalBalanceOfSPiderAfterTransFer,
+            "Should not be deducted"
+        );
+    }
+
+    function test_RevertsIfThererNoContestExist(uint256 index) public {
+        //Arrange
+        index = bound(index, 0, 9);
+        vm.startPrank(default_Foundry);
+        uint256 InitialBalnceOfdefault = mERC20.balanceOf(default_Foundry);
 
         //Act
-        // cmanager.fundContest(index);
-
-        // uint256 finalTotalReward = cmanager.getContestTotalRewards(
-        //     address(createdContest)
-        // );
+        vm.expectRevert();
+        cmanager.fundContest(index);
+        uint256 finalBalanceOfdefaultAfterTransFer = mERC20.balanceOf(
+            default_Foundry
+        );
+        vm.stopPrank();
         //Assert
+        assertEq(
+            cmanager.getContests().length,
+            0,
+            "Should be 0 as not created"
+        );
+        assertEq(
+            InitialBalnceOfdefault,
+            finalBalanceOfdefaultAfterTransFer,
+            "Should not be deducted"
+        );
+    }
+
+    function test_RevertIfTheUserBalanceISLessThanTheTotalReward() public {
+        //Arrange
+        vm.startPrank(default_Foundry);
+
+        deal(address(mERC20), default_Foundry, 1e14);
+        mERC20.approve(address(cmanager), 1e15);
+
+        address[] memory players = new address[](1);
+        players[0] = spider;
+        uint256[] memory rewards = new uint256[](1);
+        rewards[0] = 1e14;
+        ERC20Mock token = mERC20;
+        uint256 totalRewards = 1e15;
+
+        createdContest = cmanager.createContest(
+            players,
+            rewards,
+            token,
+            totalRewards
+        );
+
+        uint256 InitialBalanceOfDefautl = mERC20.balanceOf(default_Foundry);
+        //Act
+        vm.expectRevert(
+            ContestManager.ContestManager__InsufficientFunds.selector
+        );
+        cmanager.fundContest(0);
+        uint256 FinalBalanceOfDefault = mERC20.balanceOf(default_Foundry);
+        vm.stopPrank();
+
+        //Assert
+        assertEq(
+            InitialBalanceOfDefautl,
+            FinalBalanceOfDefault,
+            "Should be same as the user balance is less than the reward"
+        );
     }
 }
