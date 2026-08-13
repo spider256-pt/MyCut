@@ -197,10 +197,10 @@ forge test
         ├─ [0] VM::stopPrank()
         │   └─ ← [Return]
         └─ ← [Stop]
-        
+
     Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.34ms (771.42µs CPU time)
     Ran 1 test suite in 148.72ms (8.34ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
-```
+    ```
 
 
 
