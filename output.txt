@@ -1,0 +1,28 @@
+No files changed, compilation skipped
+
+Ran 1 test for test/POC/TestConstestManager.t.sol:TestContestManager
+[PASS] test_TrackFunds() (gas: 851915)
+Traces:
+  [851915] TestContestManager::test_TrackFunds()
+    ├─ [0] VM::startPrank(DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38])
+    │   └─ ← [Return]
+    ├─ [801485] ContestManager::createContest([0xB279F90f644e63EAca636d78E1d3fcC206632F63], [1000000000000000000 [1e18]], ERC20Mock: [0x2e234DAe75C793f67A35089C9d99245E1C58470b], 1000000000000000 [1e15])
+    │   ├─ [694722] → new Pot@0xFEfC6BAF87cF3684058D62Da40Ff3A795946Ab06
+    │   │   ├─ emit OwnershipTransferred(previousOwner: 0x0000000000000000000000000000000000000000, newOwner: ContestManager: [0x34A1D3fff3958843C43aD80F30b94c510645C316])
+    │   │   └─ ← [Return] 2663 bytes of code
+    │   └─ ← [Return] Pot: [0xFEfC6BAF87cF3684058D62Da40Ff3A795946Ab06]
+    ├─ [2850] ERC20Mock::balanceOf(DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38]) [staticcall]
+    │   └─ ← [Return] 1000000000000000000 [1e18]
+    ├─ [917] ContestManager::getContestTotalRewards(Pot: [0xFEfC6BAF87cF3684058D62Da40Ff3A795946Ab06]) [staticcall]
+    │   └─ ← [Return] 1000000000000000 [1e15]
+    ├─ [2850] ERC20Mock::balanceOf(Pot: [0xFEfC6BAF87cF3684058D62Da40Ff3A795946Ab06]) [staticcall]
+    │   └─ ← [Return] 0
+    ├─ [0] VM::assertEq(0, 0, "should be 0") [staticcall]
+    │   └─ ← [Return]
+    ├─ [0] VM::stopPrank()
+    │   └─ ← [Return]
+    └─ ← [Stop]
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.34ms (771.42µs CPU time)
+
+Ran 1 test suite in 148.72ms (8.34ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

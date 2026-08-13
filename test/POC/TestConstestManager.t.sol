@@ -46,7 +46,6 @@ contract TestContestManager is Test {
         vm.startPrank(default_Foundry);
         mERC20.approve(address(cmanager), 1e18);
         vm.stopPrank();
-        // mERC20.mint(default_Foundry, 1e20);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -148,6 +147,20 @@ contract TestContestManager is Test {
         );
     }
 
+    function test_TrackFunds() public createContest {
+        //Arrange
+        uint256 balanceOfUser = mERC20.balanceOf(default_Foundry);
+        uint256 initialTotalReward = cmanager.getContestTotalRewards(
+            address(createdContest)
+        );
+        uint256 IniTialbalanceOfContestPot = mERC20.balanceOf(
+            address(createdContest)
+        );
+
+        //Assert
+        assertEq(IniTialbalanceOfContestPot, 0, "should be 0");
+    }
+
     function test_RevertIfNonOwnerCallsFundContest() public createContest {
         //Arrange
 
@@ -230,6 +243,32 @@ contract TestContestManager is Test {
             InitialBalanceOfDefautl,
             FinalBalanceOfDefault,
             "Should be same as the user balance is less than the reward"
+        );
+    }
+
+    function test_closeContest() public createContest {
+        //Arrange
+        uint256 balanceOfPot = mERC20.balanceOf(address(createdContest));
+        uint256 lengthOfTheContestBeforeCancelling = cmanager
+            .getContests()
+            .length;
+        //Act
+        vm.warp(block.timestamp + 91 days);
+        vm.expectRevert();
+        cmanager.closeContest(address(createdContest));
+        uint256 lengthOfTheContestAfterCancelling = cmanager
+            .getContests()
+            .length;
+        //Assert
+        assertEq(
+            lengthOfTheContestBeforeCancelling,
+            1,
+            "Should be 1 as modifier handels the create contest"
+        );
+        assertEq(
+            lengthOfTheContestAfterCancelling,
+            1,
+            "Should be 1 as the created contrst is not closed"
         );
     }
 }

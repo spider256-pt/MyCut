@@ -38,7 +38,7 @@ contract ContestManager is Ownable {
         }
 
         token.transferFrom(msg.sender, address(pot), totalRewards);
-    } //Pending
+    } //Done
 
     function getContests() public view returns (address[] memory) {
         return contests;
