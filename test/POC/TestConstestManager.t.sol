@@ -253,12 +253,25 @@ contract TestContestManager is Test {
             .getContests()
             .length;
         //Act
+        cmanager.fundContest(0);
+
+        uint256 AfterFundbalanceOfPot = mERC20.balanceOf(
+            address(createdContest)
+        );
+
+        uint256 balanceOfUserAfterFunding = mERC20.balanceOf(default_Foundry);
+
         vm.warp(block.timestamp + 91 days);
-        vm.expectRevert();
+        // vm.expectRevert();
         cmanager.closeContest(address(createdContest));
         uint256 lengthOfTheContestAfterCancelling = cmanager
             .getContests()
             .length;
+
+        uint256 balanceOfUSerAfterClosingtheContest = mERC20.balanceOf(
+            default_Foundry
+        );
+
         //Assert
         assertEq(
             lengthOfTheContestBeforeCancelling,
@@ -268,7 +281,46 @@ contract TestContestManager is Test {
         assertEq(
             lengthOfTheContestAfterCancelling,
             1,
-            "Should be 1 as the created contrst is not closed"
+            "should be 1 as it closes not deleted"
+        );
+
+        assertEq(
+            AfterFundbalanceOfPot,
+            1e15,
+            "As funded using the fundContest Function"
+        );
+        assertLe(
+            balanceOfUSerAfterClosingtheContest,
+            balanceOfUserAfterFunding,
+            "Should be less"
+        );
+    }
+
+    function test_RevertIfNonPOwnerCallsTheCloseContest() public createContest {
+        uint256 balanceOfPot = mERC20.balanceOf(address(createdContest));
+        uint256 lengthOfTheContestBeforeCancelling = cmanager
+            .getContests()
+            .length;
+        //Act
+        cmanager.fundContest(0);
+
+        uint256 AfterFundbalanceOfPot = mERC20.balanceOf(
+            address(createdContest)
+        );
+
+        uint256 balanceOfUserAfterFunding = mERC20.balanceOf(default_Foundry);
+
+        vm.warp(block.timestamp + 91 days);
+        vm.expectRevert();
+        vm.startPrank(spider);
+        cmanager.closeContest(address(createdContest));
+        vm.stopPrank();
+        uint256 lengthOfTheContestAfterCancelling = cmanager
+            .getContests()
+            .length;
+
+        uint256 balanceOfUSerAfterClosingtheContest = mERC20.balanceOf(
+            default_Foundry
         );
     }
 }
