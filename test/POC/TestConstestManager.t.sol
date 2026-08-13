@@ -26,6 +26,8 @@ contract TestContestManager is Test {
     address constant default_Foundry =
         0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
 
+    address public randomAddress = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+
     /*//////////////////////////////////////////////////////////////
                              FUNCTIONAL TEST
     //////////////////////////////////////////////////////////////*/
@@ -321,6 +323,25 @@ contract TestContestManager is Test {
 
         uint256 balanceOfUSerAfterClosingtheContest = mERC20.balanceOf(
             default_Foundry
+        );
+    }
+
+    function test_RevertsIfOnwerClosesANonContract() public {
+        //Arrange
+        vm.startPrank(default_Foundry);
+        uint256 Initial_lengthOftheConstestArray = cmanager
+            .getContests()
+            .length;
+        //Act
+        vm.expectRevert();
+        cmanager.closeContest(address(randomAddress));
+        uint256 final_lengthOftheConstestArray = cmanager.getContests().length;
+        vm.stopPrank();
+        //Assert
+        assertEq(
+            Initial_lengthOftheConstestArray,
+            final_lengthOftheConstestArray,
+            "Length should be same"
         );
     }
 }
