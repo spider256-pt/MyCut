@@ -1,4 +1,5 @@
 //SPDX-License-Identifier: MIT
+pragma solidity ^0.8.18;
 
 import {Script} from "forge-std/Script.sol";
 import {Pot} from "../src/Pot.sol";
@@ -9,23 +10,26 @@ import {
 } from "lib/openzeppelin-contracts/contracts/mocks/token/ERC20Mock.sol";
 
 contract DeployPot is Script {
-    Pot pot;
-    ContestManager cmanager;
-    ERC20Mock mERC20;
+    Pot public pot;
+    ContestManager public cmanager;
+    ERC20Mock public mERC20;
 
-    function run() public returns (Pot, ContestManager, ERC20Mock) {
-        //Arrange
+    function run(address user) public returns (Pot, ContestManager, ERC20Mock) {
+        // Arrange
         vm.startBroadcast();
-        //ERC20 Mock
+
+        // ERC20 Mock
         mERC20 = new ERC20Mock();
 
-        //Contest Manager
+        // Contest Manager
         cmanager = new ContestManager();
 
-        mERC20.mint(address(this), 1e18);
+        // Mint directly
+        mERC20.mint(user, 1e18);
         mERC20.approve(address(cmanager), 1e18);
+
         address[] memory players = new address[](1);
-        players[0] = address(this);
+        players[0] = user;
 
         uint256 totalRewards = 1e15;
 
@@ -39,9 +43,10 @@ contract DeployPot is Script {
             totalRewards
         );
 
-        //Deploy
+        // Deploy
         pot = Pot(createdContest);
         vm.stopBroadcast();
+
         return (pot, cmanager, mERC20);
     }
 }
