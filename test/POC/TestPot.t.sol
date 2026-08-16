@@ -199,7 +199,6 @@ contract TestPot is Test {
     }
 
     //02
-
     function test_StuckRewards() public createMultipleAddress {
         //Arrange
 
@@ -289,7 +288,17 @@ contract TestPot is Test {
         uint256 balance_of_other_user = merc20.balanceOf(address(3));
         uint256 balance_of_other_user2 = merc20.balanceOf(address(4));
 
+        uint256 After_PotRemainingRewards = cmanager.getContestRemainingRewards(
+            address(modifier_contest)
+        );
+
+        uint256 state_check_Pot_RemainingBalance = merc20.balanceOf(
+            address(modifier_contest)
+        );
+
         //Assert
+
+        //Initial Asserts
         assertEq(initial_balanceOfSpider, 0);
         assertEq(initial_balanceOfAddress1, 0);
         assertEq(initial_balanceOfAddress2, 0);
@@ -297,5 +306,37 @@ contract TestPot is Test {
         assertEq(Initial_balanceOfContest, 0);
 
         assertEq(balanceOf_cmanager, 0);
+
+        //After fund
+
+        assertEq(After_Fund_Balance_Of_Contest, 21e18);
+
+        //After some user claim cut
+        assertEq(balance_of_spider_after_claim_cut, 1e18);
+        assertEq(balance_of_address1_after_claim_cut, 1e18);
+        assertEq(balance_of_address2_after_claim_cut, 1e18);
+
+        //After close pot the claimant get some extra funds
+        assertGt(balance_of_spider_after_closing_the_pot, 1e18);
+        assertGt(balance_of_address1_after_closing_the_pot, 1e18);
+        assertGt(balance_of_address2_after_closing_the_pot, 1e18);
+
+        assertGt(balance_Of_cmanager_after_closing_the_pot, balanceOf_cmanager);
+
+        assertLt(
+            balanc_of_contest_after_close_the_pot,
+            After_Fund_Balance_Of_Contest
+        );
+
+        //after other user claim cut
+        assertEq(balance_of_other_user, 1e18);
+        assertEq(balance_of_other_user2, 1e18);
+
+        //state_check
+        assertGt(After_PotRemainingRewards, state_check_Pot_RemainingBalance);
+
+        //Stuck_Bug
+
+        assertGt(merc20.balanceOf(address(modifier_contest)), 0, "stuck");
     }
 }
