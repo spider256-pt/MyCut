@@ -113,6 +113,16 @@ contract TestPot is Test {
         );
     }
 
+    function test_flowOfOwner() public createMultipleAddress {
+        //Arrange
+        address current_CmanagerOwner = cmanager.owner();
+
+        address current_PotOnwer = Pot(modifier_contest).owner();
+        //Act // //Assert
+        assertEq(current_CmanagerOwner, default_Foundry);
+        assertEq(current_PotOnwer, address(cmanager));
+    }
+
     //functionallity
 
     function test_claimCut() public createMultipleAddress {
@@ -146,8 +156,11 @@ contract TestPot is Test {
         assertEq(Final_RemainingReward, totalReward - 1e18);
     }
 
-    //vulns
+    /*//////////////////////////////////////////////////////////////
+                             VULNERABILITY
+    //////////////////////////////////////////////////////////////*/
 
+    //01
     function test_RevertIfLargeNumberofPlayerarePlaying() public {
         // Arrange
         uint256 totalPlayers = 20000;
@@ -183,5 +196,106 @@ contract TestPot is Test {
         vm.expectRevert();
         cmanager.createContest(players, rewards, token, totalRewards);
         vm.stopPrank();
+    }
+
+    //02
+
+    function test_StuckRewards() public createMultipleAddress {
+        //Arrange
+
+        /*
+            Initital Phase
+        */
+        uint256 initial_balanceOfSpider = merc20.balanceOf(spider);
+        uint256 initial_balanceOfAddress1 = merc20.balanceOf(address(1));
+        uint256 initial_balanceOfAddress2 = merc20.balanceOf(address(2));
+
+        uint256 Initial_balanceOfContest = merc20.balanceOf(
+            address(modifier_contest)
+        );
+
+        uint256 balanceOf_cmanager = merc20.balanceOf(address(cmanager));
+
+        //Act
+
+        /*
+            after Fund Phase
+        */
+        cmanager.fundContest(1);
+
+        uint256 After_Fund_Balance_Of_Contest = merc20.balanceOf(
+            address(modifier_contest)
+        );
+
+        /*
+            after claim cut of some user
+        */
+
+        vm.startPrank(spider);
+        Pot(modifier_contest).claimCut();
+        vm.stopPrank();
+
+        vm.startPrank(address(1));
+        Pot(modifier_contest).claimCut();
+        vm.stopPrank();
+
+        vm.startPrank(address(2));
+        Pot(modifier_contest).claimCut();
+        vm.stopPrank();
+
+        uint256 balance_of_spider_after_claim_cut = merc20.balanceOf(spider);
+        uint256 balance_of_address1_after_claim_cut = merc20.balanceOf(
+            address(1)
+        );
+        uint256 balance_of_address2_after_claim_cut = merc20.balanceOf(
+            address(2)
+        );
+
+        /*
+            phase after 91 days
+        */
+
+        vm.warp(block.timestamp + 91 days);
+        vm.startPrank(default_Foundry);
+        cmanager.closeContest(address(modifier_contest));
+        vm.stopPrank();
+
+        uint256 balance_Of_cmanager_after_closing_the_pot = merc20.balanceOf(
+            address(cmanager)
+        );
+
+        uint256 balanc_of_contest_after_close_the_pot = merc20.balanceOf(
+            address(modifier_contest)
+        );
+
+        uint256 balance_of_spider_after_closing_the_pot = merc20.balanceOf(
+            spider
+        );
+        uint256 balance_of_address1_after_closing_the_pot = merc20.balanceOf(
+            address(1)
+        );
+        uint256 balance_of_address2_after_closing_the_pot = merc20.balanceOf(
+            address(2)
+        );
+
+        vm.startPrank(address(3));
+        Pot(modifier_contest).claimCut();
+        vm.stopPrank();
+
+        vm.startPrank(address(4));
+        Pot(modifier_contest).claimCut();
+        vm.stopPrank();
+
+        uint256 balance_of_other_user = merc20.balanceOf(address(3));
+        uint256 balance_of_other_user2 = merc20.balanceOf(address(4));
+
+        //Assert
+        assertEq(initial_balanceOfSpider, 0);
+        assertEq(initial_balanceOfAddress1, 0);
+        assertEq(initial_balanceOfAddress2, 0);
+
+        assertEq(Initial_balanceOfContest, 0);
+
+        assertEq(balanceOf_cmanager, 0);
     }
 }
